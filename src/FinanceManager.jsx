@@ -6,11 +6,11 @@ import {
   Home, RefreshCw, ShoppingBag, Gift, FileText, ChevronDown,
   PawPrint, Plane, Shirt, PiggyBank, CreditCard, Scissors, Wrench, Tag,
   ExternalLink, HelpCircle, ArrowRight, Check, Mail, MessageCircle, Wallet,
-  Moon, Sun, Globe, User, UserCircle
+  Moon, Sun, Globe, User
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE CONTACTO ---
-const MERCADO_PAGO_URL = "https://link.mercadopago.com.mx/acaapp";
+const MERCADO_PAGO_URL = "http://link.mercadopago.com.mx/acaapp";
 const DEVELOPER_EMAIL = "teepeesaca@gmail.com";
 
 // --- DICCIONARIO DE IDIOMAS ---
@@ -39,12 +39,13 @@ const TRANSLATIONS = {
     contactDev: "Contactar Desarrollador",
     donate: "Donar / Invitar Café",
     viaMP: "Vía Mercado Pago",
-    restoreAlert: "RESTAURAR COPIA DE SEGURIDAD\n\nSe sobrescribirán los datos actuales.\n¿Continuar?",
+    restoreAlert: "⚠️ RESTAURAR COPIA DE SEGURIDAD\n\nSe sobrescribirán los datos actuales.\n¿Continuar?",
     deleteAlert: "¿Eliminar registro permanentemente?",
     dbRestored: "Base de datos restaurada.",
     errorFile: "Error al leer el archivo.",
+    inputNamePlaceholder: "Tu Nombre o Apodo",
     tutorialSteps: [
-      { title: "Identidad", desc: "¿Cómo quieres que te llamemos? Esto aparecerá en tu pantalla de inicio." },
+      { title: "Identidad", desc: "¿Cómo te gustaría que te llamemos? Esto personalizará tu experiencia." }, // Nuevo paso
       { title: "Control Total", desc: "Bienvenido. Aquí verás tu balance en tiempo real, ingresos vs gastos. Tu salud financiera en un vistazo." },
       { title: "Registro Ágil", desc: "1. Elige Ingreso o Egreso.\n2. Escribe el concepto y monto.\n3. ¡Listo! Todo se guarda automáticamente." },
       { title: "Categorías Dinámicas", desc: "Selecciona una categoría visual o crea una propia seleccionando '+ Otra Categoría' al final de la lista." },
@@ -53,7 +54,6 @@ const TRANSLATIONS = {
     ],
     initialBalance: "Saldo Inicial",
     leaveZero: "Puedes dejarlo en 0 si prefieres.",
-    inputName: "Tu Nombre o Apodo",
     startApp: "Iniciar App",
     next: "Siguiente",
     understood: "Entendido",
@@ -62,27 +62,8 @@ const TRANSLATIONS = {
     appearance: "Apariencia",
     language: "Idioma",
     footer: "Ingeniería y Diseño por",
-    categories: {
-      'general': 'General',
-      'food': 'Alimentos',
-      'transport': 'Transporte',
-      'home': 'Hogar/Renta',
-      'utilities': 'Servicios',
-      'subscriptions': 'Suscripciones',
-      'pets': 'Mascotas',
-      'health': 'Salud',
-      'personal_care': 'Cuidado Personal',
-      'clothing': 'Ropa/Calzado',
-      'shopping': 'Compras',
-      'gifts': 'Regalos',
-      'entertainment': 'Entretenimiento',
-      'education': 'Educación',
-      'travel': 'Viajes',
-      'maintenance': 'Mantenimiento',
-      'investments': 'Inversiones',
-      'debt': 'Deudas/Créditos',
-      'business': 'Negocio'
-    }
+    // Mapeo nulo para español (ya están en español)
+    categoryMap: {} 
   },
   en: {
     balanceLabel: "Available Balance",
@@ -108,12 +89,13 @@ const TRANSLATIONS = {
     contactDev: "Contact Developer",
     donate: "Donate / Buy me a Coffee",
     viaMP: "Via Mercado Pago",
-    restoreAlert: "RESTORE BACKUP\n\nCurrent data will be overwritten.\nContinue?",
+    restoreAlert: "⚠️ RESTORE BACKUP\n\nCurrent data will be overwritten.\nContinue?",
     deleteAlert: "Delete record permanently?",
     dbRestored: "Database restored.",
     errorFile: "Error reading file.",
+    inputNamePlaceholder: "Your Name or Nickname",
     tutorialSteps: [
-      { title: "Identity", desc: "What should we call you? This will appear on your home screen." },
+      { title: "Identity", desc: "What should we call you? This will personalize your experience." }, // Nuevo paso
       { title: "Total Control", desc: "Welcome. Here you will see your real-time balance, income vs expenses. Your financial health at a glance." },
       { title: "Quick Entry", desc: "1. Choose Income or Expense.\n2. Enter concept and amount.\n3. Done! Everything saves automatically." },
       { title: "Dynamic Categories", desc: "Select a visual category or create your own by selecting '+ Other Category' at the bottom of the list." },
@@ -122,7 +104,6 @@ const TRANSLATIONS = {
     ],
     initialBalance: "Initial Balance",
     leaveZero: "You can leave it at 0 if you prefer.",
-    inputName: "Your Name or Nickname",
     startApp: "Start App",
     next: "Next",
     understood: "Got it",
@@ -131,32 +112,33 @@ const TRANSLATIONS = {
     appearance: "Appearance",
     language: "Language",
     footer: "Engineering & Design by",
-    categories: {
-      'general': 'General',
-      'food': 'Food',
-      'transport': 'Transport',
-      'home': 'Home/Rent',
-      'utilities': 'Utilities',
-      'subscriptions': 'Subscriptions',
-      'pets': 'Pets',
-      'health': 'Health',
-      'personal_care': 'Personal Care',
-      'clothing': 'Clothing',
-      'shopping': 'Shopping',
-      'gifts': 'Gifts',
-      'entertainment': 'Entertainment',
-      'education': 'Education',
-      'travel': 'Travel',
-      'maintenance': 'Maintenance',
-      'investments': 'Investments',
-      'debt': 'Debt/Loans',
-      'business': 'Business'
+    // Mapeo de claves en Español a Inglés para visualización
+    categoryMap: {
+      'General': 'General',
+      'Alimentos': 'Food',
+      'Transporte': 'Transport',
+      'Hogar/Renta': 'Home/Rent',
+      'Servicios': 'Utilities',
+      'Suscripciones': 'Subscriptions',
+      'Mascotas': 'Pets',
+      'Salud': 'Health',
+      'Cuidado Personal': 'Personal Care',
+      'Ropa/Calzado': 'Clothing',
+      'Compras': 'Shopping',
+      'Regalos': 'Gifts',
+      'Entretenimiento': 'Entertainment',
+      'Educación': 'Education',
+      'Viajes': 'Travel',
+      'Mantenimiento': 'Maintenance',
+      'Inversiones': 'Investments',
+      'Deudas/Créditos': 'Debt/Loans',
+      'Negocio': 'Business'
     }
   }
 };
 
-// --- ICONOS DEL TUTORIAL ---
-const STEPS_ICONS = [UserCircle, Activity, Plus, Tag, ShieldCheck, Wallet];
+// --- ICONOS DEL TUTORIAL (Se agrega User para el primer paso) ---
+const STEPS_ICONS = [User, Activity, Plus, Tag, ShieldCheck, Wallet];
 
 export default function FinanceManager() {
   // --- ESTADOS Y REF ---
@@ -165,12 +147,12 @@ export default function FinanceManager() {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense'); 
-  const [category, setCategory] = useState('general'); 
+  const [category, setCategory] = useState('General');
   
   // Preferencias de Usuario
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('dark'); 
   const [lang, setLang] = useState('es'); 
-  const [userName, setUserName] = useState(''); 
+  const [userName, setUserName] = useState(''); // Inicializado vacío
 
   // Estados UI
   const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -183,41 +165,47 @@ export default function FinanceManager() {
   const [runTutorial, setRunTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [initialBalance, setInitialBalance] = useState('');
-  const [tutorialNameInput, setTutorialNameInput] = useState(''); 
+  const [tempName, setTempName] = useState(''); // Estado temporal para el nombre en tutorial
 
   const fileInputRef = useRef(null);
   const t = TRANSLATIONS[lang]; 
 
   // --- CONFIGURACIÓN DE CATEGORÍAS ---
   const categoryConfig = {
-    'general': { icon: FileText, color: 'text-slate-400', bg: 'bg-slate-800' },
-    'food': { icon: Coffee, color: 'text-amber-500', bg: 'bg-amber-900/20' },
-    'transport': { icon: Car, color: 'text-blue-400', bg: 'bg-blue-900/20' },
-    'home': { icon: Home, color: 'text-cyan-400', bg: 'bg-cyan-900/20' },
-    'utilities': { icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
-    'subscriptions': { icon: RefreshCw, color: 'text-pink-400', bg: 'bg-pink-900/20' },
-    'pets': { icon: PawPrint, color: 'text-orange-400', bg: 'bg-orange-900/20' },
-    'health': { icon: Heart, color: 'text-rose-400', bg: 'bg-rose-900/20' },
-    'personal_care': { icon: Scissors, color: 'text-fuchsia-400', bg: 'bg-fuchsia-900/20' },
-    'clothing': { icon: Shirt, color: 'text-violet-400', bg: 'bg-violet-900/20' },
-    'shopping': { icon: ShoppingBag, color: 'text-indigo-400', bg: 'bg-indigo-900/20' },
-    'gifts': { icon: Gift, color: 'text-red-400', bg: 'bg-red-900/20' },
-    'entertainment': { icon: Film, color: 'text-purple-400', bg: 'bg-purple-900/20' },
-    'education': { icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-900/20' },
-    'travel': { icon: Plane, color: 'text-sky-400', bg: 'bg-sky-900/20' },
-    'maintenance': { icon: Wrench, color: 'text-stone-400', bg: 'bg-stone-900/20' },
-    'investments': { icon: PiggyBank, color: 'text-emerald-500', bg: 'bg-emerald-900/20' },
-    'debt': { icon: CreditCard, color: 'text-slate-300', bg: 'bg-slate-700' },
-    'business': { icon: Briefcase, color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
+    'General': { icon: FileText, color: 'text-slate-400', bg: 'bg-slate-800' },
+    'Alimentos': { icon: Coffee, color: 'text-amber-500', bg: 'bg-amber-900/20' },
+    'Transporte': { icon: Car, color: 'text-blue-400', bg: 'bg-blue-900/20' },
+    'Hogar/Renta': { icon: Home, color: 'text-cyan-400', bg: 'bg-cyan-900/20' },
+    'Servicios': { icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
+    'Suscripciones': { icon: RefreshCw, color: 'text-pink-400', bg: 'bg-pink-900/20' },
+    'Mascotas': { icon: PawPrint, color: 'text-orange-400', bg: 'bg-orange-900/20' },
+    'Salud': { icon: Heart, color: 'text-rose-400', bg: 'bg-rose-900/20' },
+    'Cuidado Personal': { icon: Scissors, color: 'text-fuchsia-400', bg: 'bg-fuchsia-900/20' },
+    'Ropa/Calzado': { icon: Shirt, color: 'text-violet-400', bg: 'bg-violet-900/20' },
+    'Compras': { icon: ShoppingBag, color: 'text-indigo-400', bg: 'bg-indigo-900/20' },
+    'Regalos': { icon: Gift, color: 'text-red-400', bg: 'bg-red-900/20' },
+    'Entretenimiento': { icon: Film, color: 'text-purple-400', bg: 'bg-purple-900/20' },
+    'Educación': { icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-900/20' },
+    'Viajes': { icon: Plane, color: 'text-sky-400', bg: 'bg-sky-900/20' },
+    'Mantenimiento': { icon: Wrench, color: 'text-stone-400', bg: 'bg-stone-900/20' },
+    'Inversiones': { icon: PiggyBank, color: 'text-emerald-500', bg: 'bg-emerald-900/20' },
+    'Deudas/Créditos': { icon: CreditCard, color: 'text-slate-300', bg: 'bg-slate-700' },
+    'Negocio': { icon: Briefcase, color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
   };
 
   const categories = Object.keys(categoryConfig);
 
-  const getCategoryName = (key) => {
-    if (t.categories[key]) return t.categories[key];
-    return key;
+  // --- HELPER DE CATEGORÍAS (FIX IDIOMA) ---
+  const getCategoryLabel = (catKey) => {
+    // Si hay un mapa de traducción para este idioma y existe la clave, úsala.
+    // Si no, devuelve la clave original (que está en español).
+    if (t.categoryMap && t.categoryMap[catKey]) {
+      return t.categoryMap[catKey];
+    }
+    return catKey;
   };
 
+  // --- ESTILOS DINÁMICOS (TEMA) ---
   const getThemeStyles = () => {
     if (theme === 'light') {
       return {
@@ -251,9 +239,7 @@ export default function FinanceManager() {
   useEffect(() => {
     setTimeout(() => {
       const savedData = localStorage.getItem('finance_data_v1');
-      if (savedData) {
-        try { setTransactions(JSON.parse(savedData)); } catch {}
-      }
+      if (savedData) setTransactions(JSON.parse(savedData));
       
       const savedTheme = localStorage.getItem('aca_theme');
       if (savedTheme) setTheme(savedTheme);
@@ -265,10 +251,15 @@ export default function FinanceManager() {
       if (savedName) setUserName(savedName);
 
       const hasSeenTutorial = localStorage.getItem('aca_tutorial_seen');
-      if (!hasSeenTutorial) setRunTutorial(true);
+      if (!hasSeenTutorial) {
+        setRunTutorial(true);
+      } else if (!savedName) {
+        // Si ya vio el tutorial pero por alguna razón no tiene nombre (versiones previas), usamos un default o pedimos de nuevo (aquí default)
+        setUserName('Adhal Cabrera'); 
+      }
 
       setLoading(false);
-    }, 800);
+    }, 2000);
   }, []);
 
   // --- PERSISTENCIA ---
@@ -300,12 +291,10 @@ export default function FinanceManager() {
   const handleAddTransaction = (e) => {
     e.preventDefault();
     let finalCategory = category;
-
     if (isCustomCategory) {
       if (!customCategoryName.trim()) return; 
       finalCategory = customCategoryName.trim();
     }
-
     if (!description || !amount) return;
 
     vibrate(50); 
@@ -317,25 +306,21 @@ export default function FinanceManager() {
       category: finalCategory,
       date: new Date().toISOString(),
     };
-
     setTransactions([newTransaction, ...transactions]);
-
     setDescription('');
     setAmount('');
-
     if (isCustomCategory) {
       setCustomCategoryName('');
       setIsCustomCategory(false);
-      setCategory('general');
+      setCategory('General');
     }
-
     setShowCatMenu(false);
   };
 
   const handleDelete = (id) => {
     vibrate(50);
-    if (window.confirm(t.deleteAlert)) {
-      setTransactions(transactions.filter(tr => tr.id !== id));
+    if(window.confirm(t.deleteAlert)) {
+      setTransactions(transactions.filter(t => t.id !== id));
     }
   };
 
@@ -357,19 +342,18 @@ export default function FinanceManager() {
     vibrate(20);
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const importedData = JSON.parse(e.target.result);
         if (Array.isArray(importedData)) {
-          if (window.confirm(t.restoreAlert)) {
+          if(window.confirm(t.restoreAlert)) {
             setTransactions(importedData);
             setShowSettings(false);
             alert(t.dbRestored);
           }
         }
-      } catch {
+      } catch (error) {
         alert(t.errorFile);
       }
     };
@@ -377,12 +361,17 @@ export default function FinanceManager() {
     event.target.value = null; 
   };
 
-  // --- TUTORIAL ---
+  // --- TUTORIAL LOGIC ---
   const handleNextStep = () => {
     vibrate();
-
+    
+    // Guardar nombre si estamos en el paso 0
     if (tutorialStep === 0) {
-      if (tutorialNameInput.trim()) setUserName(tutorialNameInput.trim());
+      if (tempName.trim()) {
+        setUserName(tempName);
+      } else {
+        setUserName('Adhal Cabrera'); // Fallback si lo dejan vacío
+      }
     }
 
     if (tutorialStep < t.tutorialSteps.length - 1) {
@@ -399,16 +388,14 @@ export default function FinanceManager() {
         description: t.initialBalance,
         amount: parseFloat(initialBalance),
         type: 'income',
-        category: 'general',
+        category: 'General',
         date: new Date().toISOString(),
       };
       setTransactions(prev => [startTransaction, ...prev]);
     }
-
     setRunTutorial(false);
     setTutorialStep(0);
     setInitialBalance('');
-    setTutorialNameInput('');
     localStorage.setItem('aca_tutorial_seen', 'true');
   };
 
@@ -416,42 +403,38 @@ export default function FinanceManager() {
     setShowSettings(false);
     setTutorialStep(0);
     setInitialBalance('');
-    setTutorialNameInput(userName);
+    setTempName(userName); // Pre-llenar con el nombre actual
     setRunTutorial(true);
   };
 
   // --- KPIS & HELPERS ---
-  const incomeVal = transactions.filter(tr => tr.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-  const expenseVal = transactions.filter(tr => tr.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+  const incomeVal = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+  const expenseVal = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = incomeVal - expenseVal;
 
   const formatCurrency = (num) => {
     return new Intl.NumberFormat(lang === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency: 'MXN' }).format(num);
   };
 
-  const getCategoryConfig = (catName) => {
-    if (categoryConfig[catName]) return categoryConfig[catName];
-    return { icon: Tag, color: 'text-slate-400', bg: 'bg-slate-800' };
-  };
-
   const CategoryIcon = ({ catName, size = 18 }) => {
-    const config = getCategoryConfig(catName);
+    // Buscar la configuración original usando la clave en español (así se guardan los datos)
+    const config = categoryConfig[catName] || { icon: Tag, color: 'text-slate-400', bg: 'bg-slate-800' };
     const Icon = config.icon;
     return <Icon size={size} className={config.color} />;
   };
 
   const getCategoryBg = (catName) => {
-    const config = getCategoryConfig(catName);
-    return config.bg || 'bg-slate-800';
+    const config = categoryConfig[catName] || { bg: 'bg-slate-800' };
+    return config.bg;
   };
 
-  // --- SPLASH ---
+  // --- RENDERIZADO: SPLASH SCREEN ---
   if (loading) {
     return (
       <div className={`fixed inset-0 ${s.bg} flex flex-col items-center justify-center z-50`}>
-        <div className="relative flex flex-col items-center">
+        <div className="relative flex flex-col items-center animate-in fade-in zoom-in duration-700">
           <div className="relative mb-6">
-            <Activity size={56} strokeWidth={1.5} className="text-amber-500 absolute -top-12 left-1/2 -translate-x-1/2" />
+            <Activity size={56} strokeWidth={1.5} className="text-amber-500 absolute -top-12 left-1/2 -translate-x-1/2 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
             <h1 className="text-7xl font-serif tracking-tighter leading-none select-none" style={{ fontFamily: 'Times New Roman, serif' }}>
               <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-800'}>A</span>
               <span className="text-amber-500 -ml-2 z-10 relative">C</span>
@@ -459,9 +442,10 @@ export default function FinanceManager() {
             </h1>
           </div>
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-amber-700 to-transparent mb-4"></div>
-          {userName && (
-            <p className={`${s.subText} text-[10px] tracking-[0.4em] uppercase font-medium`}>{userName}</p>
-          )}
+          {/* Mostramos el nombre si ya cargó, sino placeholder visual */}
+          <p className={`${s.subText} text-[10px] tracking-[0.4em] uppercase font-medium h-4`}>
+            {userName}
+          </p>
           <div className="mt-12 flex gap-1">
              <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
              <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
@@ -472,19 +456,22 @@ export default function FinanceManager() {
     );
   }
 
-  // --- APP ---
+  // --- APP PRINCIPAL ---
   return (
     <div className={`fixed inset-0 ${s.bg} ${s.text} font-sans overflow-hidden flex flex-col select-none touch-manipulation transition-colors duration-500`}>
       <style>{`
         body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}</style>
       
+      {/* HEADER */}
       <header className={`${s.headerBg} backdrop-blur-md border-b ${s.cardBorder} pt-safe-top pb-3 px-4 shadow-lg shrink-0 z-20 transition-colors duration-500`}>
         <div className="flex items-center justify-between max-w-lg mx-auto pt-2">
           <div className="flex items-center gap-3">
-            <div className={`bg-amber-500/10 p-2 rounded-xl border border-amber-500/20`}>
+            <div className={`bg-amber-500/10 p-2 rounded-xl border border-amber-500/20 shadow-sm shadow-amber-900/20`}>
               <Activity className="text-amber-500 w-5 h-5" />
             </div>
             <div className="flex flex-col leading-none">
@@ -496,15 +483,16 @@ export default function FinanceManager() {
           </div>
           <button 
             onClick={() => { vibrate(); setShowSettings(!showSettings); }}
-            className={`p-2 rounded-full transition-all active:scale-90 ${showSettings ? 'bg-amber-900/40 text-amber-400' : `${s.subText}`}`}
+            className={`p-2 rounded-full transition-all active:scale-90 ${showSettings ? 'bg-amber-900/40 text-amber-400' : `${s.subText} hover:text-amber-500`}`}
           >
             {showSettings ? <X size={22} /> : <Settings size={22} />}
           </button>
         </div>
       </header>
 
+      {/* MODAL TUTORIAL */}
       {runTutorial && (
-        <div className={`fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 ${s.modalBg} backdrop-blur-md`}>
+        <div className={`fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 ${s.modalBg} backdrop-blur-md animate-in fade-in duration-300`}>
            <div className={`w-full max-w-sm ${s.cardBg} border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden`}>
               <div className="flex gap-2 mb-6">
                  {t.tutorialSteps.map((_, idx) => (
@@ -517,17 +505,20 @@ export default function FinanceManager() {
                     {React.createElement(STEPS_ICONS[tutorialStep], { size: 32 })}
                  </div>
                  <h3 className={`text-xl font-bold ${s.text}`}>{t.tutorialSteps[tutorialStep].title}</h3>
-                 <p className={`${s.subText} text-sm leading-relaxed whitespace-pre-line`}>{t.tutorialSteps[tutorialStep].desc}</p>
+                 <p className={`${s.subText} text-sm leading-relaxed whitespace-pre-line`}>
+                    {t.tutorialSteps[tutorialStep].desc}
+                 </p>
                  
+                 {/* Paso 0: Identidad */}
                  {tutorialStep === 0 && (
-                   <div className="w-full mt-2">
+                   <div className="w-full mt-2 animate-in slide-in-from-bottom-2">
                      <div className="relative">
                        <User size={16} className={`absolute left-3 top-3.5 ${s.subText}`} />
                        <input 
                          type="text" 
-                         value={tutorialNameInput}
-                         onChange={(e) => setTutorialNameInput(e.target.value)}
-                         placeholder={t.inputName}
+                         value={tempName}
+                         onChange={(e) => setTempName(e.target.value)}
+                         placeholder={t.inputNamePlaceholder}
                          className={`w-full ${s.inputBg} border ${s.cardBorder} rounded-xl py-3 pl-9 pr-4 ${s.text} placeholder-slate-500 focus:border-amber-500 focus:outline-none transition-colors`}
                          autoFocus
                        />
@@ -535,8 +526,9 @@ export default function FinanceManager() {
                    </div>
                  )}
 
+                 {/* Paso Final: Saldo */}
                  {tutorialStep === t.tutorialSteps.length - 1 && (
-                   <div className="w-full mt-2">
+                   <div className="w-full mt-2 animate-in slide-in-from-bottom-2">
                      <div className="relative">
                        <DollarSign size={16} className={`absolute left-3 top-3.5 ${s.subText}`} />
                        <input 
@@ -555,7 +547,7 @@ export default function FinanceManager() {
 
               <button 
                 onClick={handleNextStep}
-                className="w-full mt-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full mt-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-amber-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {tutorialStep === t.tutorialSteps.length - 1 ? t.startApp : t.next} 
                 {tutorialStep === t.tutorialSteps.length - 1 ? <Check size={18} /> : <ArrowRight size={18} />}
@@ -564,12 +556,13 @@ export default function FinanceManager() {
         </div>
       )}
 
+      {/* MODAL DE CONTACTO Y DONACIONES */}
       {showDonationModal && (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-6 ${s.modalBg} backdrop-blur-sm`}>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-6 ${s.modalBg} backdrop-blur-sm animate-in fade-in`}>
           <div className={`${s.cardBg} border ${s.cardBorder} p-6 rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden`}>
              <button 
               onClick={() => { setShowDonationModal(false); vibrate(); }} 
-              className={`absolute top-4 right-4 ${s.subText} p-1 rounded-full z-10`}
+              className={`absolute top-4 right-4 ${s.subText} hover:${s.text} p-1 rounded-full z-10`}
              >
                 <X size={20}/>
              </button>
@@ -579,7 +572,9 @@ export default function FinanceManager() {
                  <MessageCircle size={28} className={s.accentText} />
                </div>
                <h3 className={`text-xl font-bold ${s.text} mb-1`}>{t.supportTitle}</h3>
-               <p className={`${s.subText} text-xs leading-relaxed max-w-[250px]`}>{t.supportDesc}</p>
+               <p className={`${s.subText} text-xs leading-relaxed max-w-[250px]`}>
+                 {t.supportDesc}
+               </p>
              </div>
 
              <div className="space-y-3">
@@ -621,15 +616,20 @@ export default function FinanceManager() {
              </div>
              
              <p className={`text-[10px] ${s.subText} text-center mt-6`}>
-               {t.footer} {userName || 'Adhal Cabrera'}
+               {t.footer} {userName}
              </p>
           </div>
         </div>
       )}
 
+      {/* MAIN */}
       <main className="flex-1 overflow-y-auto no-scrollbar relative w-full max-w-lg mx-auto">
+        
+        {/* SETTINGS OVERLAY */}
         {showSettings && (
-          <div className={`sticky top-0 z-30 ${s.headerBg} backdrop-blur-md border-b ${s.cardBorder} p-4 shadow-2xl`}>
+          <div className={`sticky top-0 z-30 ${s.headerBg} backdrop-blur-md border-b ${s.cardBorder} p-4 animate-in slide-in-from-top-5 shadow-2xl`}>
+            
+            {/* Personalization Section */}
             <div className="mb-4 space-y-3">
               <h3 className={`text-[10px] font-bold ${s.subText} uppercase tracking-widest`}>{t.personalization}</h3>
               
@@ -645,6 +645,7 @@ export default function FinanceManager() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
+                 {/* Theme Toggle */}
                  <button onClick={toggleTheme} className={`flex items-center justify-between p-3 ${s.inputBg} border ${s.cardBorder} rounded-xl active:scale-95 transition-transform`}>
                     <div className="flex items-center gap-2">
                        {theme === 'dark' ? <Moon size={16} className="text-indigo-400"/> : <Sun size={16} className="text-amber-500"/>}
@@ -655,6 +656,7 @@ export default function FinanceManager() {
                     </div>
                  </button>
                  
+                 {/* Language Toggle */}
                  <button onClick={toggleLang} className={`flex items-center justify-between p-3 ${s.inputBg} border ${s.cardBorder} rounded-xl active:scale-95 transition-transform`}>
                     <div className="flex items-center gap-2">
                        <Globe size={16} className="text-emerald-500"/>
@@ -668,11 +670,11 @@ export default function FinanceManager() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={handleExportData} className={`flex flex-col items-center p-4 ${s.cardBg} rounded-xl transition-colors border ${s.cardBorder} group`}>
+              <button onClick={handleExportData} className={`flex flex-col items-center p-4 ${s.cardBg} rounded-xl active:bg-opacity-80 transition-colors border ${s.cardBorder} group`}>
                 <Download className="text-emerald-500 mb-2 group-active:scale-90 transition-transform" />
                 <span className={`text-xs font-bold ${s.text}`}>{t.backup}</span>
               </button>
-              <button onClick={() => fileInputRef.current.click()} className={`flex flex-col items-center p-4 ${s.cardBg} rounded-xl transition-colors border ${s.cardBorder} group`}>
+              <button onClick={() => fileInputRef.current.click()} className={`flex flex-col items-center p-4 ${s.cardBg} rounded-xl active:bg-opacity-80 transition-colors border ${s.cardBorder} group`}>
                 <Upload className="text-amber-500 mb-2 group-active:scale-90 transition-transform" />
                 <span className={`text-xs font-bold ${s.text}`}>{t.restore}</span>
               </button>
@@ -699,8 +701,10 @@ export default function FinanceManager() {
         )}
 
         <div className="p-4 space-y-6 pb-28">
+          
+          {/* BALANCE CARD */}
           <div className={`bg-gradient-to-br ${theme === 'light' ? 'from-white via-slate-50 to-slate-100' : 'from-slate-900 via-slate-800 to-slate-900'} p-6 rounded-[2rem] border ${s.cardBorder} shadow-2xl relative overflow-hidden group transition-colors duration-500`}>
-            <div className="absolute -right-4 -top-4 opacity-5 rotate-12">
+            <div className="absolute -right-4 -top-4 opacity-5 rotate-12 group-hover:opacity-10 transition-opacity duration-700">
               <ShieldCheck size={140} className={s.text} />
             </div>
             
@@ -733,17 +737,22 @@ export default function FinanceManager() {
             </div>
           </div>
 
+          {/* FORMULARIO */}
           <div className={`${s.cardBg} p-4 rounded-3xl border ${s.cardBorder} transition-colors duration-500`}>
             <div className={`flex ${s.inputBg} p-1 rounded-2xl border ${s.cardBorder} mb-4`}>
                 <button
                   onClick={() => { vibrate(); setType('expense'); }}
-                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${type === 'expense' ? 'bg-rose-600 text-white shadow-lg shadow-rose-900/20' : `${s.subText}`}`}
+                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${
+                    type === 'expense' ? 'bg-rose-600 text-white shadow-lg shadow-rose-900/20' : `${s.subText} hover:${s.text}`
+                  }`}
                 >
                   {t.addExpense}
                 </button>
                 <button
                   onClick={() => { vibrate(); setType('income'); }}
-                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${type === 'income' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : `${s.subText}`}`}
+                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${
+                    type === 'income' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : `${s.subText} hover:${s.text}`
+                  }`}
                 >
                   {t.addIncome}
                 </button>
@@ -783,7 +792,7 @@ export default function FinanceManager() {
                           <div className={`p-1.5 rounded-lg ${categoryConfig[category]?.bg || 'bg-slate-800'}`}>
                             <CategoryIcon catName={category} size={18} />
                           </div>
-                          <span className="text-sm font-medium truncate">{getCategoryName(category)}</span>
+                          <span className="text-sm font-medium truncate">{getCategoryLabel(category)}</span>
                         </div>
                         <ChevronDown size={16} className={`${s.subText} transition-transform ${showCatMenu ? 'rotate-180' : ''}`} />
                       </button>
@@ -803,7 +812,7 @@ export default function FinanceManager() {
                           <button 
                             type="button"
                             onClick={() => { setIsCustomCategory(false); setCustomCategoryName(''); vibrate(); }}
-                            className={`absolute right-3 p-1 ${theme === 'light' ? 'bg-slate-200' : 'bg-slate-800'} rounded-full ${s.subText}`}
+                            className={`absolute right-3 p-1 ${theme === 'light' ? 'bg-slate-200' : 'bg-slate-800'} rounded-full ${s.subText} hover:${s.text}`}
                           >
                             <X size={14} />
                           </button>
@@ -811,25 +820,25 @@ export default function FinanceManager() {
                     )}
 
                     {showCatMenu && !isCustomCategory && (
-                      <div className={`absolute bottom-full left-0 right-0 mb-2 ${s.cardBg} border ${s.cardBorder} rounded-2xl shadow-xl max-h-60 overflow-y-auto p-2 z-20 no-scrollbar`}>
+                      <div className={`absolute bottom-full left-0 right-0 mb-2 ${s.cardBg} border ${s.cardBorder} rounded-2xl shadow-xl max-h-60 overflow-y-auto p-2 z-20 no-scrollbar animate-in slide-in-from-bottom-2 fade-in zoom-in-95`}>
                         <div className="grid grid-cols-1 gap-1">
                           {categories.map(cat => (
                             <button
                               key={cat}
                               type="button"
                               onClick={() => { setCategory(cat); setShowCatMenu(false); vibrate(); }}
-                              className={`flex items-center gap-3 w-full p-3 rounded-xl transition-colors ${category === cat ? 'bg-amber-900/20 border border-amber-500/30' : (theme === 'light' ? 'hover:bg-slate-100' : 'hover:bg-slate-800')}`}
+                              className={`flex items-center gap-3 w-full p-3 rounded-xl transition-colors ${category === cat ? 'bg-amber-900/20 border border-amber-500/30' : `hover:${theme === 'light' ? 'bg-slate-100' : 'bg-slate-800'}`}`}
                             >
                               <div className={`p-1.5 rounded-lg ${categoryConfig[cat].bg}`}>
                                 {React.createElement(categoryConfig[cat].icon, { size: 16, className: categoryConfig[cat].color })}
                               </div>
-                              <span className={`text-sm ${category === cat ? 'text-amber-500' : s.subText}`}>{getCategoryName(cat)}</span>
+                              <span className={`text-sm ${category === cat ? 'text-amber-500' : s.subText}`}>{getCategoryLabel(cat)}</span>
                             </button>
                           ))}
                           <button
                               type="button"
                               onClick={() => { setIsCustomCategory(true); setShowCatMenu(false); vibrate(); }}
-                              className={`flex items-center gap-3 w-full p-3 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-slate-100' : 'hover:bg-slate-800'} border-t ${s.cardBorder} mt-1`}
+                              className={`flex items-center gap-3 w-full p-3 rounded-xl transition-colors hover:${theme === 'light' ? 'bg-slate-100' : 'bg-slate-800'} border-t ${s.cardBorder} mt-1`}
                             >
                               <div className={`p-1.5 rounded-lg ${theme === 'light' ? 'bg-slate-200' : 'bg-slate-800'}`}>
                                 <Plus size={16} className={s.subText} />
@@ -843,7 +852,7 @@ export default function FinanceManager() {
                   
                   <button
                     type="submit"
-                    className="bg-amber-600 hover:bg-amber-500 text-white px-6 rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    className="bg-amber-600 hover:bg-amber-500 text-white px-6 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-900/20 active:scale-95 transition-transform"
                     onClick={() => vibrate(30)}
                   >
                     <Plus size={28} />
@@ -852,28 +861,27 @@ export default function FinanceManager() {
             </form>
           </div>
 
+          {/* LISTA */}
           <div className="space-y-3 pt-2">
             <h3 className={`text-[10px] font-bold ${s.subText} uppercase tracking-widest pl-2 mb-2`}>{t.recentActivity}</h3>
             
-            {transactions.map((tr) => (
-              <div key={tr.id} className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center`}>
+            {transactions.map((t) => (
+              <div key={t.id} className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center active:bg-opacity-80 transition-all`}>
                  <div className="flex items-center gap-3.5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(tr.category)}`}>
-                       <CategoryIcon catName={tr.category} size={20} />
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(t.category)}`}>
+                       <CategoryIcon catName={t.category} size={20} />
                     </div>
                     <div>
-                      <p className={`font-bold ${s.text} text-sm leading-tight`}>{tr.description}</p>
-                      <p className={`text-[11px] ${s.subText} mt-0.5`}>
-                        {getCategoryName(tr.category)} • {new Date(tr.date).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: '2-digit', month: 'short' })}
-                      </p>
+                      <p className={`font-bold ${s.text} text-sm leading-tight`}>{t.description}</p>
+                      <p className={`text-[11px] ${s.subText} mt-0.5`}>{getCategoryLabel(t.category)} • {new Date(t.date).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: '2-digit', month: 'short' })}</p>
                     </div>
                  </div>
                  <div className="text-right flex flex-col items-end">
-                    <p className={`font-mono font-bold text-sm ${tr.type === 'income' ? 'text-emerald-400' : s.text}`}>
-                      {tr.type === 'expense' ? '-' : '+'}{formatCurrency(tr.amount)}
+                    <p className={`font-mono font-bold text-sm ${t.type === 'income' ? 'text-emerald-400' : s.text}`}>
+                      {t.type === 'expense' ? '-' : '+'}{formatCurrency(t.amount)}
                     </p>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(tr.id); }} 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }} 
                       className="text-rose-500/40 p-1.5 -mr-1.5 hover:text-rose-500 transition-colors"
                     >
                       <Trash2 size={14} />
