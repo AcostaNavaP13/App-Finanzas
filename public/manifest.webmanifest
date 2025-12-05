@@ -3,40 +3,41 @@
   "short_name": "ACA Finance",
   "description": "Control simple de ingresos y gastos con categorías y respaldo local.",
   "id": "/App-Finanzas/",
-  "start_url": "/App-Finanzas/",
-  "scope": "/App-Finanzas/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
   "orientation": "portrait",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/App-Finanzas/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/App-Finanzas/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "screenshots": [
     {
-      "src": "/App-Finanzas/screen-1.png",
-      "sizes": "1080x1920",
+      "src": "screen-1.png",
+      "sizes": "735x1280",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "/App-Finanzas/screen-2.png",
-      "sizes": "1080x1920",
+      "src": "screen-2.png",
+      "sizes": "735x1280",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "/App-Finanzas/screen-3.png",
-      "sizes": "1080x1920",
+      "src": "screen-3.png",
+      "sizes": "735x1280",
       "type": "image/png",
       "form_factor": "narrow"
     }
