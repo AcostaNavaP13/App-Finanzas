@@ -2,13 +2,29 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <link rel="manifest" href="/App-Finanzas/manifest.webmanifest" />
     <meta name="theme-color" content="#0f172a" />
+    <meta
+      name="description"
+      content="Control simple de ingresos y gastos con categorías y respaldo local."
+    />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CashFlow</title>
   </head>
+
   <body class="bg-slate-950">
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/App-Finanzas/sw.js");
+        });
+      }
+    </script>
   </body>
 </html>
