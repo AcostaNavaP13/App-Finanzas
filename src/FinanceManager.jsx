@@ -4,8 +4,13 @@ import {
   Settings, Download, Upload, X, Smartphone, ShieldCheck,
   Coffee, Car, Zap, Film, Heart, BookOpen, Briefcase, 
   Home, RefreshCw, ShoppingBag, Gift, FileText, ChevronDown,
-  PawPrint, Plane, Shirt, PiggyBank, CreditCard, Scissors, Wrench, Tag
+  PawPrint, Plane, Shirt, PiggyBank, CreditCard, Scissors, Wrench, Tag,
+  ExternalLink, HelpCircle, ArrowRight, Check, Mail, MessageCircle, Wallet
 } from 'lucide-react';
+
+// --- CONFIGURACIÓN DE CONTACTO Y DONACIONES ---
+const MERCADO_PAGO_URL = "https://link.mercadopago.com.mx/acaapp";
+const DEVELOPER_EMAIL = "teepeesaca@gmail.com";
 
 export default function FinanceManager() {
   // --- ESTADOS Y REF ---
@@ -15,16 +20,23 @@ export default function FinanceManager() {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense'); 
   const [category, setCategory] = useState('General');
-
+  
   // Estados para categoría personalizada
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryName, setCustomCategoryName] = useState('');
-
+  
   const [showSettings, setShowSettings] = useState(false);
   const [showCatMenu, setShowCatMenu] = useState(false); 
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  
+  // Estados del Tutorial
+  const [runTutorial, setRunTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [initialBalance, setInitialBalance] = useState('');
+
   const fileInputRef = useRef(null);
 
-  // --- CONFIGURACIÓN DE CATEGORÍAS (ICONOS Y COLORES) ---
+  // --- CONFIGURACIÓN DE CATEGORÍAS ---
   const categoryConfig = {
     'General': { icon: FileText, color: 'text-slate-400', bg: 'bg-slate-800' },
     'Alimentos': { icon: Coffee, color: 'text-amber-500', bg: 'bg-amber-900/20' },
@@ -49,9 +61,38 @@ export default function FinanceManager() {
 
   const categories = Object.keys(categoryConfig);
 
+  // --- DATOS DEL TUTORIAL ---
+  const tutorialSteps = [
+    {
+      title: "Control Total",
+      desc: "Bienvenido a ACA Finance. Aquí verás tu balance en tiempo real, ingresos vs gastos. Tu salud financiera en un vistazo.",
+      icon: Activity
+    },
+    {
+      title: "Registro Ágil",
+      desc: "1. Elige Ingreso o Egreso.\n2. Escribe el concepto y monto.\n3. ¡Listo! Todo se guarda automáticamente.",
+      icon: Plus
+    },
+    {
+      title: "Categorías Dinámicas",
+      desc: "Selecciona una categoría visual o crea una propia (ej. 'Tanda', 'Proyecto X') seleccionando la opción '+ Otra Categoría' al final de la lista.",
+      icon: Tag
+    },
+    {
+      title: "Seguridad de Datos",
+      desc: "Tus datos viven en este dispositivo. Usa el menú de Configuración para RESPALDAR (Exportar) y llevártelos a donde quieras.",
+      icon: ShieldCheck
+    },
+    {
+      title: "Definir Arranque",
+      desc: "Para que tu balance sea real desde hoy, ingresa tu saldo actual (Efectivo + Bancos). Nosotros crearemos el primer registro por ti.",
+      icon: Wallet
+    }
+  ];
+
   // --- EFECTOS DE INICIALIZACIÓN ---
   useEffect(() => {
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       const savedData = localStorage.getItem('finance_data_v1');
       if (savedData) {
         try {
@@ -60,10 +101,14 @@ export default function FinanceManager() {
           console.error("Data corruption detected", e);
         }
       }
-      setLoading(false);
-    }, 1500);
+      
+      const hasSeenTutorial = localStorage.getItem('aca_tutorial_seen');
+      if (!hasSeenTutorial) {
+        setRunTutorial(true);
+      }
 
-    return () => clearTimeout(timer);
+      setLoading(false);
+    }, 2000);
   }, []);
 
   // --- PERSISTENCIA ---
@@ -81,11 +126,10 @@ export default function FinanceManager() {
   // --- LÓGICA DE NEGOCIO ---
   const handleAddTransaction = (e) => {
     e.preventDefault();
-
-    // Determinar categoría final
+    
     let finalCategory = category;
     if (isCustomCategory) {
-      if (!customCategoryName.trim()) return; // Validar que no esté vacía
+      if (!customCategoryName.trim()) return; 
       finalCategory = customCategoryName.trim();
     }
 
@@ -103,13 +147,10 @@ export default function FinanceManager() {
     };
 
     setTransactions([newTransaction, ...transactions]);
-
-    // Reset fields
+    
     setDescription('');
     setAmount('');
-
-    // Si era custom, reseteamos a General para el siguiente o mantenemos si prefieres
-    // Aquí reseteo a modo normal para flujo rápido
+    
     if (isCustomCategory) {
       setCustomCategoryName('');
       setIsCustomCategory(false);
@@ -162,6 +203,42 @@ export default function FinanceManager() {
     event.target.value = null; 
   };
 
+  // --- TUTORIAL LOGIC ---
+  const handleNextStep = () => {
+    vibrate();
+    if (tutorialStep < tutorialSteps.length - 1) {
+      setTutorialStep(tutorialStep + 1);
+    } else {
+      finishTutorial();
+    }
+  };
+
+  const finishTutorial = () => {
+    if (initialBalance && parseFloat(initialBalance) > 0) {
+      const startTransaction = {
+        id: crypto.randomUUID(),
+        description: 'Saldo Inicial',
+        amount: parseFloat(initialBalance),
+        type: 'income',
+        category: 'General',
+        date: new Date().toISOString(),
+      };
+      setTransactions(prev => [startTransaction, ...prev]);
+    }
+    
+    setRunTutorial(false);
+    setTutorialStep(0);
+    setInitialBalance('');
+    localStorage.setItem('aca_tutorial_seen', 'true');
+  };
+
+  const restartTutorial = () => {
+    setShowSettings(false);
+    setTutorialStep(0);
+    setInitialBalance('');
+    setRunTutorial(true);
+  };
+
   // --- KPIS ---
   const income = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const expense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
@@ -171,51 +248,65 @@ export default function FinanceManager() {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(num);
   };
 
-  // --- RENDERIZADO: SPLASH SCREEN ---
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50">
-        <Activity className="text-amber-600 w-16 h-16 animate-pulse mb-4" />
-        <h1 className="text-2xl font-bold text-white tracking-widest">LESTER</h1>
-        <p className="text-amber-600 text-xs tracking-[0.3em] mt-1">ENGINEERING</p>
-        <div className="mt-8 w-32 h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-amber-600 animate-[loading_1s_ease-in-out_infinite]"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Componente auxiliar para icono de categoría
-  // Modificado para soportar categorías personalizadas (fallback a icono Tag)
   const CategoryIcon = ({ catName, size = 18 }) => {
     const config = categoryConfig[catName] || { icon: Tag, color: 'text-slate-400', bg: 'bg-slate-800' };
     const Icon = config.icon;
     return <Icon size={size} className={config.color} />;
   };
 
-  // helper para bg de categorías desconocidas en la lista
   const getCategoryBg = (catName) => {
     return categoryConfig[catName]?.bg || 'bg-slate-800';
   };
+
+  // --- RENDERIZADO: SPLASH SCREEN ---
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-50">
+        <div className="relative flex flex-col items-center animate-in fade-in zoom-in duration-700">
+          <div className="relative mb-6">
+            <Activity size={56} strokeWidth={1.5} className="text-amber-500 absolute -top-12 left-1/2 -translate-x-1/2 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+            <h1 className="text-7xl font-serif text-slate-100 tracking-tighter leading-none select-none" style={{ fontFamily: 'Times New Roman, serif' }}>
+              <span className="text-slate-300">A</span>
+              <span className="text-amber-500 -ml-2 z-10 relative">C</span>
+              <span className="text-slate-300 -ml-2">A</span>
+            </h1>
+          </div>
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-amber-700 to-transparent mb-4"></div>
+          <p className="text-slate-500 text-[10px] tracking-[0.4em] uppercase font-medium">Adhal Cabrera</p>
+          <div className="mt-12 flex gap-1">
+             <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+             <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+             <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // --- APP PRINCIPAL ---
   return (
     <div className="fixed inset-0 bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col select-none touch-manipulation">
       <style>{`
         body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
-        @keyframes loading { 0% { width: 0% } 50% { width: 100% } 100% { width: 0%; margin-left: 100% } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}</style>
-
+      
       {/* HEADER */}
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 pt-safe-top pb-3 px-4 shadow-lg shrink-0 z-20">
         <div className="flex items-center justify-between max-w-lg mx-auto pt-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-amber-500/10 p-1.5 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-500/10 p-2 rounded-xl border border-amber-500/20 shadow-sm shadow-amber-900/20">
               <Activity className="text-amber-500 w-5 h-5" />
             </div>
-            <h1 className="text-lg font-bold tracking-wide text-slate-100">CASH<span className="text-amber-500">FLOW</span></h1>
+            <div className="flex flex-col leading-none">
+               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Control de</span>
+               <h1 className="text-lg text-slate-100 font-sans">
+                 ¿Cuánto <span className="font-black text-amber-500 tracking-wide">Gasto?</span>
+               </h1>
+            </div>
           </div>
           <button 
             onClick={() => { vibrate(); setShowSettings(!showSettings); }}
@@ -226,9 +317,124 @@ export default function FinanceManager() {
         </div>
       </header>
 
+      {/* MODAL TUTORIAL */}
+      {runTutorial && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300">
+           <div className="w-full max-w-sm bg-slate-900 border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+              <div className="flex gap-2 mb-6">
+                 {tutorialSteps.map((_, idx) => (
+                   <div key={idx} className={`h-1 flex-1 rounded-full transition-colors ${idx <= tutorialStep ? 'bg-amber-500' : 'bg-slate-800'}`}></div>
+                 ))}
+              </div>
+
+              <div className="flex flex-col items-center text-center space-y-4 min-h-[220px]">
+                 <div className="bg-slate-800 p-4 rounded-full text-amber-500 mb-2">
+                    {React.createElement(tutorialSteps[tutorialStep].icon, { size: 32 })}
+                 </div>
+                 <h3 className="text-xl font-bold text-white">{tutorialSteps[tutorialStep].title}</h3>
+                 <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line">
+                    {tutorialSteps[tutorialStep].desc}
+                 </p>
+                 
+                 {tutorialStep === tutorialSteps.length - 1 && (
+                   <div className="w-full mt-2 animate-in slide-in-from-bottom-2">
+                     <div className="relative">
+                       <DollarSign size={16} className="absolute left-3 top-3.5 text-slate-500" />
+                       <input 
+                         type="number" 
+                         value={initialBalance}
+                         onChange={(e) => setInitialBalance(e.target.value)}
+                         placeholder="Ej. 5000"
+                         className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-9 pr-4 text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-colors"
+                         autoFocus
+                       />
+                     </div>
+                     <p className="text-[10px] text-slate-500 mt-2 text-center">Puedes dejarlo en 0 si prefieres.</p>
+                   </div>
+                 )}
+              </div>
+
+              <button 
+                onClick={handleNextStep}
+                className="w-full mt-6 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-amber-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                {tutorialStep === tutorialSteps.length - 1 ? 'Iniciar App' : 'Siguiente'} 
+                {tutorialStep === tutorialSteps.length - 1 ? <Check size={18} /> : <ArrowRight size={18} />}
+              </button>
+           </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONTACTO Y DONACIONES */}
+      {showDonationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden">
+             
+             <button 
+              onClick={() => { setShowDonationModal(false); vibrate(); }} 
+              className="absolute top-4 right-4 text-slate-500 hover:text-white bg-slate-800/50 p-1 rounded-full z-10"
+             >
+                <X size={20}/>
+             </button>
+
+             <div className="flex flex-col items-center text-center mb-6 mt-4">
+               <div className="bg-slate-800 p-3 rounded-2xl mb-3 border border-slate-700">
+                 <MessageCircle size={28} className="text-slate-300" />
+               </div>
+               <h3 className="text-xl font-bold text-white mb-1">Contacto y Apoyo</h3>
+               <p className="text-slate-400 text-xs leading-relaxed max-w-[250px]">
+                 ¿Tienes sugerencias o quieres apoyar el desarrollo? Elige una opción:
+               </p>
+             </div>
+
+             <div className="space-y-3">
+                <a 
+                  href={`mailto:${DEVELOPER_EMAIL}`}
+                  className="flex items-center justify-between w-full p-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl transition-all active:scale-95 group"
+                  onClick={() => vibrate()}
+                >
+                   <div className="flex items-center gap-3">
+                     <div className="bg-slate-700 p-2 rounded-lg group-hover:bg-slate-600 transition-colors">
+                        <Mail size={18} className="text-blue-400" />
+                     </div>
+                     <div className="text-left">
+                        <span className="block font-bold text-slate-200 text-sm">Contactar Desarrollador</span>
+                        <span className="block text-[10px] text-slate-500">{DEVELOPER_EMAIL}</span>
+                     </div>
+                   </div>
+                   <ArrowRight size={16} className="text-slate-500 group-hover:text-slate-300" />
+                </a>
+
+                <a 
+                  href={MERCADO_PAGO_URL}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full p-4 bg-[#009EE3] hover:bg-[#0089c4] rounded-2xl transition-all active:scale-95 group shadow-lg shadow-sky-900/20"
+                  onClick={() => vibrate()}
+                >
+                   <div className="flex items-center gap-3">
+                     <div className="bg-white/20 p-2 rounded-lg">
+                        <DollarSign size={18} className="text-white" />
+                     </div>
+                     <div className="text-left">
+                        <span className="block font-bold text-white text-sm">Donar / Invitar Café</span>
+                        <span className="block text-[10px] text-white/80">Vía Mercado Pago</span>
+                     </div>
+                   </div>
+                   <ExternalLink size={16} className="text-white/60 group-hover:text-white" />
+                </a>
+             </div>
+             
+             <p className="text-[10px] text-slate-600 text-center mt-6">
+               Adhal Cabrera • Ingeniería y Diseño
+             </p>
+          </div>
+        </div>
+      )}
+
       {/* MAIN */}
       <main className="flex-1 overflow-y-auto no-scrollbar relative w-full max-w-lg mx-auto bg-slate-950">
-
+        
         {/* SETTINGS OVERLAY */}
         {showSettings && (
           <div className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700 p-4 animate-in slide-in-from-top-5 shadow-2xl">
@@ -241,19 +447,36 @@ export default function FinanceManager() {
                 <Upload className="text-amber-500 mb-2 group-active:scale-90 transition-transform" />
                 <span className="text-xs font-bold text-slate-300">RESTAURAR</span>
               </button>
+              
+              <button 
+                onClick={() => { vibrate(); restartTutorial(); }}
+                className="col-span-2 flex items-center justify-center gap-2 p-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-xl active:scale-[0.98] transition-all group"
+              >
+                <HelpCircle size={16} className="text-blue-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-bold text-slate-300">¿CÓMO USAR LA APP? / TUTORIAL</span>
+              </button>
+
+              <button 
+                onClick={() => { setShowDonationModal(true); setShowSettings(false); vibrate(); }} 
+                className="col-span-2 flex items-center justify-center gap-2 p-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-xl active:scale-[0.98] transition-all group"
+              >
+                <Mail size={16} className="text-slate-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-bold text-slate-300">CONTACTO / DONAR</span>
+              </button>
+
               <input type="file" ref={fileInputRef} onChange={handleImportData} accept=".json" className="hidden" />
             </div>
           </div>
         )}
 
         <div className="p-4 space-y-6 pb-28">
-
+          
           {/* BALANCE CARD */}
           <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 rounded-[2rem] border border-slate-700/50 shadow-2xl relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 opacity-5 rotate-12 group-hover:opacity-10 transition-opacity duration-700">
               <ShieldCheck size={140} />
             </div>
-
+            
             <div className="flex flex-col items-center justify-center mb-6 z-10 relative">
               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Balance Disponible</p>
               <h2 className={`text-5xl font-black tracking-tighter ${balance >= 0 ? 'text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400' : 'text-rose-400'}`}>
@@ -283,9 +506,8 @@ export default function FinanceManager() {
             </div>
           </div>
 
-          {/* FORMULARIO DE CAPTURA INTELIGENTE */}
+          {/* FORMULARIO */}
           <div className="bg-slate-900/50 p-4 rounded-3xl border border-slate-800">
-            {/* Toggle Tipo */}
             <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 mb-4">
                 <button
                   onClick={() => { vibrate(); setType('expense'); }}
@@ -312,7 +534,7 @@ export default function FinanceManager() {
                       type="text"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Concepto (ej. Gasolina)"
+                      placeholder="Concepto"
                       className="w-full bg-slate-950 border border-slate-800 text-white px-4 py-4 rounded-2xl focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 focus:outline-none transition-all placeholder:text-slate-600"
                     />
                   </div>
@@ -326,11 +548,9 @@ export default function FinanceManager() {
                     />
                   </div>
               </div>
-
+              
               <div className="flex gap-3">
-                  {/* Selector Dinámico: Categoría o Input Manual */}
                   <div className="relative flex-1">
-
                     {!isCustomCategory ? (
                       <button
                         type="button"
@@ -368,7 +588,6 @@ export default function FinanceManager() {
                       </div>
                     )}
 
-                    {/* Menú Dropdown Personalizado */}
                     {showCatMenu && !isCustomCategory && (
                       <div className="absolute bottom-full left-0 right-0 mb-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl max-h-60 overflow-y-auto p-2 z-20 no-scrollbar animate-in slide-in-from-bottom-2 fade-in zoom-in-95">
                         <div className="grid grid-cols-1 gap-1">
@@ -385,7 +604,6 @@ export default function FinanceManager() {
                               <span className={`text-sm ${category === cat ? 'text-amber-100' : 'text-slate-400'}`}>{cat}</span>
                             </button>
                           ))}
-                          {/* Opción Manual */}
                           <button
                               type="button"
                               onClick={() => { setIsCustomCategory(true); setShowCatMenu(false); vibrate(); }}
@@ -400,7 +618,7 @@ export default function FinanceManager() {
                       </div>
                     )}
                   </div>
-
+                  
                   <button
                     type="submit"
                     className="bg-amber-600 hover:bg-amber-500 text-white px-6 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-900/20 active:scale-95 transition-transform"
@@ -412,14 +630,13 @@ export default function FinanceManager() {
             </form>
           </div>
 
-          {/* LISTA DE MOVIMIENTOS */}
+          {/* LISTA */}
           <div className="space-y-3 pt-2">
             <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-2 mb-2">Actividad Reciente</h3>
-
+            
             {transactions.map((t) => (
               <div key={t.id} className="group bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center active:bg-slate-800 active:border-slate-700 transition-all">
                  <div className="flex items-center gap-3.5">
-                    {/* Icono de Categoría */}
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(t.category)}`}>
                        <CategoryIcon catName={t.category} size={20} />
                     </div>
@@ -441,7 +658,7 @@ export default function FinanceManager() {
                  </div>
               </div>
             ))}
-
+            
             {transactions.length === 0 && (
                <div className="py-12 flex flex-col items-center justify-center opacity-30">
                  <Smartphone size={56} className="mb-4 text-slate-600" />
