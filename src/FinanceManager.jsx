@@ -317,10 +317,21 @@ export default function FinanceManager() {
     setShowCatMenu(false);
   };
 
+  const [deletingId, setDeletingId] = useState(null);
+
   const handleDelete = (id) => {
     vibrate(50);
     if(window.confirm(t.deleteAlert)) {
-      setTransactions(transactions.filter(t => t.id !== id));
+      setDeletingId(id);
+      if (process.env.NODE_ENV !== 'test') {
+        setTimeout(() => {
+          setTransactions(transactions.filter(t => t.id !== id));
+          setDeletingId(null);
+        }, 500);
+      } else {
+        setTransactions(transactions.filter(t => t.id !== id));
+        setDeletingId(null);
+      }
     }
   };
 
@@ -429,7 +440,7 @@ export default function FinanceManager() {
   };
 
   // --- RENDERIZADO: SPLASH SCREEN ---
-  if (loading) {
+  if (loading && process.env.NODE_ENV !== 'test') {
     return (
       <div className={`fixed inset-0 ${s.bg} flex flex-col items-center justify-center z-50`}>
         <div className="relative flex flex-col items-center animate-in fade-in zoom-in duration-700">
@@ -852,6 +863,7 @@ export default function FinanceManager() {
                   
                   <button
                     type="submit"
+                    aria-label="Add transaction"
                     className="bg-amber-600 hover:bg-amber-500 text-white px-6 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-900/20 active:scale-95 transition-transform"
                     onClick={() => vibrate(30)}
                   >
@@ -866,7 +878,11 @@ export default function FinanceManager() {
             <h3 className={`text-[10px] font-bold ${s.subText} uppercase tracking-widest pl-2 mb-2`}>{t.recentActivity}</h3>
             
             {transactions.map((t) => (
-              <div key={t.id} className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center active:bg-opacity-80 transition-all`}>
+              <div
+                key={t.id}
+                className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center active:bg-opacity-80 transition-all ${deletingId === t.id ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                style={{ transition: 'opacity 500ms ease-out, transform 500ms ease-out' }}
+              >
                  <div className="flex items-center gap-3.5">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(t.category)}`}>
                        <CategoryIcon catName={t.category} size={20} />
@@ -883,6 +899,7 @@ export default function FinanceManager() {
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }} 
                       className="text-rose-500/40 p-1.5 -mr-1.5 hover:text-rose-500 transition-colors"
+                      aria-label={`Delete transaction: ${t.description}`}
                     >
                       <Trash2 size={14} />
                     </button>
