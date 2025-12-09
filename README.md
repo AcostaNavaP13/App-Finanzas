@@ -6,4 +6,4 @@ Comandos:
 - npm run build
 
 ## Políticas de privacidad
-Consulta las [Políticas de privacidad](docs/PRIVACY_POLICY.md) para conocer cómo la aplicación maneja tus datos.
+Consulta las [Políticas de privacidad](docs/PRIVACY_POLICY.md) publicadas en este repositorio (GitHub) para conocer cómo la aplicación maneja tus datos antes de usarla.
