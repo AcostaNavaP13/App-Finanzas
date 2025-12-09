@@ -6,7 +6,7 @@ import {
   Home, RefreshCw, ShoppingBag, Gift, FileText, ChevronDown,
   PawPrint, Plane, Shirt, PiggyBank, CreditCard, Scissors, Wrench, Tag,
   ExternalLink, HelpCircle, ArrowRight, Check, Mail, MessageCircle, Wallet,
-  Moon, Sun, Globe, User
+  Moon, Sun, Globe, User, Megaphone, Bell
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN DE CONTACTO ---
@@ -44,8 +44,9 @@ const TRANSLATIONS = {
     dbRestored: "Base de datos restaurada.",
     errorFile: "Error al leer el archivo.",
     inputNamePlaceholder: "Tu Nombre o Apodo",
+    adSpace: "Publicidad",
     tutorialSteps: [
-      { title: "Identidad", desc: "¿Cómo te gustaría que te llamemos? Esto personalizará tu experiencia." }, // Nuevo paso
+      { title: "Identidad", desc: "¿Cómo te gustaría que te llamemos? Esto personalizará tu experiencia." }, 
       { title: "Control Total", desc: "Bienvenido. Aquí verás tu balance en tiempo real, ingresos vs gastos. Tu salud financiera en un vistazo." },
       { title: "Registro Ágil", desc: "1. Elige Ingreso o Egreso.\n2. Escribe el concepto y monto.\n3. ¡Listo! Todo se guarda automáticamente." },
       { title: "Categorías Dinámicas", desc: "Selecciona una categoría visual o crea una propia seleccionando '+ Otra Categoría' al final de la lista." },
@@ -61,8 +62,11 @@ const TRANSLATIONS = {
     yourName: "Tu Nombre",
     appearance: "Apariencia",
     language: "Idioma",
+    notifications: "Notificaciones",
+    enableNotifications: "Recordatorio Diario (9:00 PM)",
+    notificationTitle: "¿Cuánto Gasto?",
+    notificationBody: "No olvides cargar tus gastos hoy",
     footer: "Ingeniería y Diseño por",
-    // Mapeo nulo para español (ya están en español)
     categoryMap: {} 
   },
   en: {
@@ -94,8 +98,9 @@ const TRANSLATIONS = {
     dbRestored: "Database restored.",
     errorFile: "Error reading file.",
     inputNamePlaceholder: "Your Name or Nickname",
+    adSpace: "Advertisement",
     tutorialSteps: [
-      { title: "Identity", desc: "What should we call you? This will personalize your experience." }, // Nuevo paso
+      { title: "Identity", desc: "What should we call you? This will personalize your experience." }, 
       { title: "Total Control", desc: "Welcome. Here you will see your real-time balance, income vs expenses. Your financial health at a glance." },
       { title: "Quick Entry", desc: "1. Choose Income or Expense.\n2. Enter concept and amount.\n3. Done! Everything saves automatically." },
       { title: "Dynamic Categories", desc: "Select a visual category or create your own by selecting '+ Other Category' at the bottom of the list." },
@@ -111,8 +116,11 @@ const TRANSLATIONS = {
     yourName: "Your Name",
     appearance: "Appearance",
     language: "Language",
+    notifications: "Notifications",
+    enableNotifications: "Daily Reminder (9:00 PM)",
+    notificationTitle: "Spending Tracker",
+    notificationBody: "Don't forget to log your expenses today",
     footer: "Engineering & Design by",
-    // Mapeo de claves en Español a Inglés para visualización
     categoryMap: {
       'General': 'General',
       'Alimentos': 'Food',
@@ -137,7 +145,30 @@ const TRANSLATIONS = {
   }
 };
 
-// --- ICONOS DEL TUTORIAL (Se agrega User para el primer paso) ---
+// --- MAPEO DE TRADUCCIÓN DE CATEGORÍAS (ES -> EN) ---
+const CATEGORY_MAP_TO_EN = {
+  'General': 'General',
+  'Alimentos': 'Food',
+  'Transporte': 'Transport',
+  'Hogar/Renta': 'Home/Rent',
+  'Servicios': 'Utilities',
+  'Suscripciones': 'Subscriptions',
+  'Mascotas': 'Pets',
+  'Salud': 'Health',
+  'Cuidado Personal': 'Personal Care',
+  'Ropa/Calzado': 'Clothing',
+  'Compras': 'Shopping',
+  'Regalos': 'Gifts',
+  'Entretenimiento': 'Entertainment',
+  'Educación': 'Education',
+  'Viajes': 'Travel',
+  'Mantenimiento': 'Maintenance',
+  'Inversiones': 'Investments',
+  'Deudas/Créditos': 'Debt/Loans',
+  'Negocio': 'Business'
+};
+
+// --- ICONOS DEL TUTORIAL ---
 const STEPS_ICONS = [User, Activity, Plus, Tag, ShieldCheck, Wallet];
 
 export default function FinanceManager() {
@@ -152,7 +183,8 @@ export default function FinanceManager() {
   // Preferencias de Usuario
   const [theme, setTheme] = useState('dark'); 
   const [lang, setLang] = useState('es'); 
-  const [userName, setUserName] = useState(''); // Inicializado vacío
+  const [userName, setUserName] = useState(''); 
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   // Estados UI
   const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -165,12 +197,13 @@ export default function FinanceManager() {
   const [runTutorial, setRunTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [initialBalance, setInitialBalance] = useState('');
-  const [tempName, setTempName] = useState(''); // Estado temporal para el nombre en tutorial
+  const [tempName, setTempName] = useState(''); 
 
   const fileInputRef = useRef(null);
+  const notificationTimeoutRef = useRef(null);
   const t = TRANSLATIONS[lang]; 
 
-  // --- CONFIGURACIÓN DE CATEGORÍAS ---
+  // --- CONFIGURACIÓN DE CATEGORÍAS (KEYS EN ESPAÑOL) ---
   const categoryConfig = {
     'General': { icon: FileText, color: 'text-slate-400', bg: 'bg-slate-800' },
     'Alimentos': { icon: Coffee, color: 'text-amber-500', bg: 'bg-amber-900/20' },
@@ -195,17 +228,15 @@ export default function FinanceManager() {
 
   const categories = Object.keys(categoryConfig);
 
-  // --- HELPER DE CATEGORÍAS (FIX IDIOMA) ---
-  const getCategoryLabel = (catKey) => {
-    // Si hay un mapa de traducción para este idioma y existe la clave, úsala.
-    // Si no, devuelve la clave original (que está en español).
-    if (t.categoryMap && t.categoryMap[catKey]) {
-      return t.categoryMap[catKey];
+  // --- HELPER DE VISUALIZACIÓN DE CATEGORÍA ---
+  const getDisplayCategory = (originalCategoryName) => {
+    if (lang === 'en' && CATEGORY_MAP_TO_EN[originalCategoryName]) {
+      return CATEGORY_MAP_TO_EN[originalCategoryName];
     }
-    return catKey;
+    return originalCategoryName;
   };
 
-  // --- ESTILOS DINÁMICOS (TEMA) ---
+  // --- ESTILOS DINÁMICOS ---
   const getThemeStyles = () => {
     if (theme === 'light') {
       return {
@@ -250,29 +281,71 @@ export default function FinanceManager() {
       const savedName = localStorage.getItem('aca_username');
       if (savedName) setUserName(savedName);
 
+      const savedNotif = localStorage.getItem('aca_notifications');
+      if (savedNotif === 'true') setNotificationsEnabled(true);
+
       const hasSeenTutorial = localStorage.getItem('aca_tutorial_seen');
       if (!hasSeenTutorial) {
         setRunTutorial(true);
       } else if (!savedName) {
-        // Si ya vio el tutorial pero por alguna razón no tiene nombre (versiones previas), usamos un default o pedimos de nuevo (aquí default)
-        setUserName('Adhal Cabrera'); 
+        setUserName('Usuario'); 
       }
 
       setLoading(false);
     }, 2000);
   }, []);
 
-  // --- PERSISTENCIA ---
   useEffect(() => {
     if (!loading) {
       localStorage.setItem('finance_data_v1', JSON.stringify(transactions));
       localStorage.setItem('aca_theme', theme);
       localStorage.setItem('aca_lang', lang);
       localStorage.setItem('aca_username', userName);
+      localStorage.setItem('aca_notifications', String(notificationsEnabled));
     }
-  }, [transactions, theme, lang, userName, loading]);
+  }, [transactions, theme, lang, userName, notificationsEnabled, loading]);
 
-  // --- UTILIDADES ---
+  // --- LÓGICA DE NOTIFICACIONES ---
+  useEffect(() => {
+    if (notificationsEnabled) {
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+      
+      const scheduleNotification = () => {
+        const now = new Date();
+        const night = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 21, 0, 0, 0); 
+        
+        if (now > night) {
+          night.setDate(night.getDate() + 1);
+        }
+        
+        const msToWait = night - now;
+        
+        if (notificationTimeoutRef.current) clearTimeout(notificationTimeoutRef.current);
+        
+        notificationTimeoutRef.current = setTimeout(() => {
+          if (Notification.permission === "granted") {
+            new Notification(t.notificationTitle, {
+              body: t.notificationBody,
+              // Ajustado a tu ruta real en GH Pages
+              icon: '/App-Finanzas/icon-192.png'
+            });
+          }
+          scheduleNotification();
+        }, msToWait);
+      };
+
+      scheduleNotification();
+    } else {
+      if (notificationTimeoutRef.current) clearTimeout(notificationTimeoutRef.current);
+    }
+
+    return () => {
+      if (notificationTimeoutRef.current) clearTimeout(notificationTimeoutRef.current);
+    };
+  }, [notificationsEnabled, lang, t]);
+
   const vibrate = (ms = 10) => {
     if (navigator.vibrate) navigator.vibrate(ms);
   };
@@ -285,6 +358,14 @@ export default function FinanceManager() {
   const toggleLang = () => {
     vibrate();
     setLang(prev => prev === 'es' ? 'en' : 'es');
+  };
+
+  const toggleNotifications = () => {
+    vibrate();
+    if (!notificationsEnabled && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+    setNotificationsEnabled(!notificationsEnabled);
   };
 
   // --- LÓGICA DE NEGOCIO ---
@@ -365,12 +446,11 @@ export default function FinanceManager() {
   const handleNextStep = () => {
     vibrate();
     
-    // Guardar nombre si estamos en el paso 0
     if (tutorialStep === 0) {
       if (tempName.trim()) {
         setUserName(tempName);
       } else {
-        setUserName('Adhal Cabrera'); // Fallback si lo dejan vacío
+        setUserName('Adhal Cabrera'); 
       }
     }
 
@@ -396,6 +476,7 @@ export default function FinanceManager() {
     setRunTutorial(false);
     setTutorialStep(0);
     setInitialBalance('');
+    setTempName('');
     localStorage.setItem('aca_tutorial_seen', 'true');
   };
 
@@ -403,11 +484,11 @@ export default function FinanceManager() {
     setShowSettings(false);
     setTutorialStep(0);
     setInitialBalance('');
-    setTempName(userName); // Pre-llenar con el nombre actual
+    setTempName(userName); 
     setRunTutorial(true);
   };
 
-  // --- KPIS & HELPERS ---
+  // --- KPIS ---
   const incomeVal = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const expenseVal = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = incomeVal - expenseVal;
@@ -417,7 +498,6 @@ export default function FinanceManager() {
   };
 
   const CategoryIcon = ({ catName, size = 18 }) => {
-    // Buscar la configuración original usando la clave en español (así se guardan los datos)
     const config = categoryConfig[catName] || { icon: Tag, color: 'text-slate-400', bg: 'bg-slate-800' };
     const Icon = config.icon;
     return <Icon size={size} className={config.color} />;
@@ -428,7 +508,7 @@ export default function FinanceManager() {
     return config.bg;
   };
 
-  // --- RENDERIZADO: SPLASH SCREEN ---
+  // --- SPLASH ---
   if (loading) {
     return (
       <div className={`fixed inset-0 ${s.bg} flex flex-col items-center justify-center z-50`}>
@@ -442,7 +522,6 @@ export default function FinanceManager() {
             </h1>
           </div>
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-amber-700 to-transparent mb-4"></div>
-          {/* Mostramos el nombre si ya cargó, sino placeholder visual */}
           <p className={`${s.subText} text-[10px] tracking-[0.4em] uppercase font-medium h-4`}>
             {userName}
           </p>
@@ -456,7 +535,7 @@ export default function FinanceManager() {
     );
   }
 
-  // --- APP PRINCIPAL ---
+  // --- APP ---
   return (
     <div className={`fixed inset-0 ${s.bg} ${s.text} font-sans overflow-hidden flex flex-col select-none touch-manipulation transition-colors duration-500`}>
       <style>{`
@@ -509,7 +588,6 @@ export default function FinanceManager() {
                     {t.tutorialSteps[tutorialStep].desc}
                  </p>
                  
-                 {/* Paso 0: Identidad */}
                  {tutorialStep === 0 && (
                    <div className="w-full mt-2 animate-in slide-in-from-bottom-2">
                      <div className="relative">
@@ -526,7 +604,6 @@ export default function FinanceManager() {
                    </div>
                  )}
 
-                 {/* Paso Final: Saldo */}
                  {tutorialStep === t.tutorialSteps.length - 1 && (
                    <div className="w-full mt-2 animate-in slide-in-from-bottom-2">
                      <div className="relative">
@@ -629,7 +706,6 @@ export default function FinanceManager() {
         {showSettings && (
           <div className={`sticky top-0 z-30 ${s.headerBg} backdrop-blur-md border-b ${s.cardBorder} p-4 animate-in slide-in-from-top-5 shadow-2xl`}>
             
-            {/* Personalization Section */}
             <div className="mb-4 space-y-3">
               <h3 className={`text-[10px] font-bold ${s.subText} uppercase tracking-widest`}>{t.personalization}</h3>
               
@@ -645,7 +721,6 @@ export default function FinanceManager() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                 {/* Theme Toggle */}
                  <button onClick={toggleTheme} className={`flex items-center justify-between p-3 ${s.inputBg} border ${s.cardBorder} rounded-xl active:scale-95 transition-transform`}>
                     <div className="flex items-center gap-2">
                        {theme === 'dark' ? <Moon size={16} className="text-indigo-400"/> : <Sun size={16} className="text-amber-500"/>}
@@ -656,7 +731,6 @@ export default function FinanceManager() {
                     </div>
                  </button>
                  
-                 {/* Language Toggle */}
                  <button onClick={toggleLang} className={`flex items-center justify-between p-3 ${s.inputBg} border ${s.cardBorder} rounded-xl active:scale-95 transition-transform`}>
                     <div className="flex items-center gap-2">
                        <Globe size={16} className="text-emerald-500"/>
@@ -667,6 +741,17 @@ export default function FinanceManager() {
                     </span>
                  </button>
               </div>
+
+              <button onClick={toggleNotifications} className={`flex items-center justify-between w-full p-3 ${s.inputBg} border ${s.cardBorder} rounded-xl active:scale-95 transition-transform`}>
+                 <div className="flex items-center gap-2">
+                    <Bell size={16} className={notificationsEnabled ? "text-amber-500" : s.subText}/>
+                    <span className={`text-xs font-bold ${s.text}`}>{t.notifications}</span>
+                 </div>
+                 <div className={`w-8 h-4 rounded-full relative transition-colors ${notificationsEnabled ? 'bg-amber-600' : 'bg-slate-700'}`}>
+                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${notificationsEnabled ? 'left-4' : 'left-0.5'}`}></div>
+                 </div>
+              </button>
+              <p className={`text-[9px] ${s.subText} text-right pr-1`}>{t.enableNotifications}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -700,7 +785,7 @@ export default function FinanceManager() {
           </div>
         )}
 
-        <div className="p-4 space-y-6 pb-28">
+        <div className="p-4 space-y-6 pb-48">
           
           {/* BALANCE CARD */}
           <div className={`bg-gradient-to-br ${theme === 'light' ? 'from-white via-slate-50 to-slate-100' : 'from-slate-900 via-slate-800 to-slate-900'} p-6 rounded-[2rem] border ${s.cardBorder} shadow-2xl relative overflow-hidden group transition-colors duration-500`}>
@@ -792,7 +877,7 @@ export default function FinanceManager() {
                           <div className={`p-1.5 rounded-lg ${categoryConfig[category]?.bg || 'bg-slate-800'}`}>
                             <CategoryIcon catName={category} size={18} />
                           </div>
-                          <span className="text-sm font-medium truncate">{getCategoryLabel(category)}</span>
+                          <span className="text-sm font-medium truncate">{getDisplayCategory(category)}</span>
                         </div>
                         <ChevronDown size={16} className={`${s.subText} transition-transform ${showCatMenu ? 'rotate-180' : ''}`} />
                       </button>
@@ -832,7 +917,7 @@ export default function FinanceManager() {
                               <div className={`p-1.5 rounded-lg ${categoryConfig[cat].bg}`}>
                                 {React.createElement(categoryConfig[cat].icon, { size: 16, className: categoryConfig[cat].color })}
                               </div>
-                              <span className={`text-sm ${category === cat ? 'text-amber-500' : s.subText}`}>{getCategoryLabel(cat)}</span>
+                              <span className={`text-sm ${category === cat ? 'text-amber-500' : s.subText}`}>{getDisplayCategory(cat)}</span>
                             </button>
                           ))}
                           <button
@@ -865,23 +950,25 @@ export default function FinanceManager() {
           <div className="space-y-3 pt-2">
             <h3 className={`text-[10px] font-bold ${s.subText} uppercase tracking-widest pl-2 mb-2`}>{t.recentActivity}</h3>
             
-            {transactions.map((t) => (
-              <div key={t.id} className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center active:bg-opacity-80 transition-all`}>
+            {transactions.map((tx) => (
+              <div key={tx.id} className={`group ${s.cardBg} p-3.5 rounded-2xl border ${s.cardBorder} flex justify-between items-center active:bg-opacity-80 transition-all`}>
                  <div className="flex items-center gap-3.5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(t.category)}`}>
-                       <CategoryIcon catName={t.category} size={20} />
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${getCategoryBg(tx.category)}`}>
+                       <CategoryIcon catName={tx.category} size={20} />
                     </div>
                     <div>
-                      <p className={`font-bold ${s.text} text-sm leading-tight`}>{t.description}</p>
-                      <p className={`text-[11px] ${s.subText} mt-0.5`}>{getCategoryLabel(t.category)} • {new Date(t.date).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: '2-digit', month: 'short' })}</p>
+                      <p className={`font-bold ${s.text} text-sm leading-tight`}>{tx.description}</p>
+                      <p className={`text-[11px] ${s.subText} mt-0.5`}>
+                        {getDisplayCategory(tx.category)} • {new Date(tx.date).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: '2-digit', month: 'short' })}
+                      </p>
                     </div>
                  </div>
                  <div className="text-right flex flex-col items-end">
-                    <p className={`font-mono font-bold text-sm ${t.type === 'income' ? 'text-emerald-400' : s.text}`}>
-                      {t.type === 'expense' ? '-' : '+'}{formatCurrency(t.amount)}
+                    <p className={`font-mono font-bold text-sm ${tx.type === 'income' ? 'text-emerald-400' : s.text}`}>
+                      {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
                     </p>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }} 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(tx.id); }} 
                       className="text-rose-500/40 p-1.5 -mr-1.5 hover:text-rose-500 transition-colors"
                     >
                       <Trash2 size={14} />
@@ -899,6 +986,19 @@ export default function FinanceManager() {
             )}
           </div>
         </div>
+
+        {/* BANNER PUBLICITARIO INFERIOR */}
+        <div className={`fixed bottom-0 left-0 right-0 z-20 ${theme === 'light' ? 'bg-slate-100 border-t border-slate-200' : 'bg-slate-950 border-t border-slate-800'} p-2 pb-safe`}>
+          <div className="max-w-lg mx-auto flex flex-col items-center">
+             <p className={`text-[9px] ${s.subText} uppercase tracking-widest mb-1`}>{t.adSpace}</p>
+             <div className={`w-full h-[50px] ${theme === 'light' ? 'bg-slate-200' : 'bg-slate-900'} rounded-lg border border-dashed ${s.cardBorder} flex items-center justify-center`}>
+                <span className={`text-xs ${s.subText} flex items-center gap-2`}>
+                  <Megaphone size={14} /> Espacio para Banner (320x50)
+                </span>
+             </div>
+          </div>
+        </div>
+
       </main>
     </div>
   );
